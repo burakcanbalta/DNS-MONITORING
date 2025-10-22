@@ -4,6 +4,20 @@ A real-time DNS monitoring and threat detection system designed for SOCs, securi
 
 ---
 
+## 🎯 What It Does
+
+This tool monitors DNS traffic in real-time to detect malicious domains, suspicious patterns (including DGA and DNS tunneling), and other anomalies. It produces actionable alerts, logs, and detailed reports for security analysis and incident response.
+
+**Key Capabilities:**
+
+* Real-time DNS monitoring across multiple network interfaces.
+* Threat detection using local intelligence and DGA heuristics.
+* DNS tunneling detection via entropy analysis and query volume monitoring.
+* Historical reporting and export in JSON, CSV, or TXT formats.
+* Real-time alerts via console or webhook integrations.
+
+---
+
 ## 🚀 Quick Start
 
 ### 1. Requirements
@@ -16,70 +30,41 @@ requests==2.31.0
 ### 2. Installation
 
 ```bash
-# Install required packages
+# Install required Python packages
 pip install dpkt requests
 ```
 
-### 3. Usage Examples
+---
+
+## 🛠️ How It Works
+
+1. Captures DNS packets from the selected interface (raw sockets or tcpdump fallback).
+2. Parses each DNS query and analyzes for:
+
+   * High entropy domain names
+   * Unusually frequent queries from a single client
+   * Matches against threat intelligence
+   * DGA-like patterns
+3. Logs suspicious events, stores them in a local database, and triggers alerts.
+4. Generates reports on-demand or periodically for analysis and compliance.
+
+---
+
+## ⚡ Usage Examples
 
 ```bash
-# Start DNS monitoring on interface eth0 (requires root)
+# Start real-time monitoring on eth0
 sudo python dns_monitor.py --monitor --interface eth0
 
 # Monitor for 10 minutes
 sudo python dns_monitor.py --monitor --interface eth0 --duration 600
 
-# Generate a report for the last 24 hours (JSON)
+# Generate report for last 24 hours (JSON)
 python dns_monitor.py --report --hours 24 --format json
 
-# Add a malicious domain to threat intelligence
+# Add a malicious domain to threat intelligence DB
 python dns_monitor.py --add-threat "malicious-domain.com" --threat-type "MALWARE"
 ```
-
----
-
-## 🎯 Purpose
-
-Monitor DNS traffic in real-time, detect malicious domains and suspicious patterns (including DGA and DNS tunneling), and produce actionable alerts and reports for SOC analysts and incident responders.
-
----
-
-## 🔍 Features
-
-- **Real-time DNS Monitoring**
-  - Raw packet capture to collect DNS queries
-  - tcpdump fallback support
-  - Multi-interface monitoring and filtering
-
-- **Threat Detection**
-  - Malicious domain lookup (threat intelligence feed)
-  - DGA (Domain Generation Algorithm) detection heuristics
-  - Suspicious TLD identification (e.g., .tk, .ml, .xyz)
-  - Query pattern analysis and anomaly detection
-
-- **DNS Tunneling Detection**
-  - High-entropy domain detection
-  - Abnormal query volume analysis
-  - Data exfiltration pattern recognition
-  - Real-time alerting
-
-- **Intelligence & Reporting**
-  - Threat intelligence database (editable)
-  - Export reports to JSON / CSV / TXT
-  - Historical analysis and event logging
-
----
-
-## 🛠️ How It Works (High Level)
-
-1. The tool captures DNS packets from the selected interface (raw sockets or tcpdump).
-2. Each DNS query is parsed and analyzed for suspicious characteristics:
-   - Unusually long or high-entropy labels.
-   - High frequency queries from a single client.
-   - Matches against threat intelligence.
-   - Known DGA-like patterns.
-3. Events that meet detection criteria are logged, stored in the local DB, and trigger alerts (console, webhook, etc.).
-4. Periodic or on-demand reports can be generated from stored scan data.
 
 ---
 
@@ -106,43 +91,32 @@ python dns_monitor.py --help
 
 ## 🧪 Use Cases
 
-### SOC Monitoring
+**SOC Monitoring**
+
 ```bash
-# 24/7 DNS monitoring on the perimeter
+# 24/7 DNS monitoring on perimeter
 sudo python dns_monitor.py --monitor --interface eth0
 ```
-**Example alert:**
+
+**Example Alert:**
+
 ```
 🚨 HIGH ALERT: DNS_TUNNELING - 192.168.1.100 -> dgadomain12345.com
 ```
 
-### Incident Response
+**Incident Response**
+
 ```bash
 # Retrieve DNS query history for a suspicious IP
 python dns_monitor.py --report --hours 48 --format json --filter-ip 192.168.1.100
 ```
 
-### Threat Hunting
+**Threat Hunting**
+
 ```bash
-# Add a new malicious domain to the local intelligence DB
+# Add a new malicious domain to intelligence DB
 python dns_monitor.py --add-threat "new-malware-domain.com" --threat-type "MALWARE"
 ```
-
----
-
-## 🐞 Troubleshooting
-
-- **Permission errors**: Packet capture usually requires root privileges. Run with `sudo` or configure appropriate capabilities.
-- **tcpdump fallback**: If raw socket capture fails, the tool will attempt to use `tcpdump`—ensure tcpdump is installed.
-- **High volume**: For very high traffic, consider sampling, filtering, or running on a dedicated sensor.
-
----
-
-## 📈 Performance & Scaling
-
-- Use interface-level filters to reduce noise (e.g., capture only UDP/53).
-- Persist events to a lightweight DB and rotate logs periodically.
-- For enterprise deployments, forward alerts to a SIEM or a central collector.
 
 ---
 
@@ -156,7 +130,7 @@ python dns_monitor.py --add-threat "new-malware-domain.com" --threat-type "MALWA
 ```
 
 ```json
-# Report sample (JSON)
+# Report example (JSON)
 {
   "timestamp": "2025-10-22T18:00:00Z",
   "client": "10.0.0.5",
@@ -168,15 +142,34 @@ python dns_monitor.py --add-threat "new-malware-domain.com" --threat-type "MALWA
 
 ---
 
-## 🤝 Contributing
+## 🔍 Features
 
-- Fork the repo
-- Create a feature branch
-- Submit a pull request with tests and documentation
-- Areas for contribution: DGA detection improvements, integrations (Slack, SIEM), UI/dashboard, performance tuning
+* **Real-time DNS Monitoring**: Capture raw DNS packets, multi-interface support, tcpdump fallback.
+* **Threat Detection**: Detect malicious domains, DGA domains, suspicious TLDs, anomalous query patterns.
+* **DNS Tunneling Detection**: High-entropy domain analysis, data exfiltration pattern recognition, real-time alerts.
+* **Intelligence & Reporting**: Threat database, JSON/CSV/TXT reports, historical analysis, event logging.
 
 ---
 
-## 📄 License
+## 🐞 Troubleshooting
 
-This project is licensed under the MIT License. See the LICENSE file for details.
+* **Permission errors**: Requires root or proper packet capture capabilities.
+* **High traffic volume**: Use filters, sampling, or a dedicated sensor.
+* **tcpdump fallback**: Ensure tcpdump installed for raw socket fallback.
+
+---
+
+## 📈 Performance & Scaling
+
+* Interface-level filters to reduce noise (UDP/53).
+* Persist events in lightweight DB, rotate logs periodically.
+* Forward alerts to SIEM or central collector in enterprise environments.
+
+---
+
+## 🤝 Contributing
+
+* Fork the repo.
+* Create a feature branch.
+* Submit a pull request with tests and documentation.
+* Contribution areas: DGA detection, alert integrations, dashboard/UI, performance tuning.
